@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="flex items-center justify-center px-4 py-10 min-h-screen bg-gradient-to-br from-blue-100 via-blue-200 to-white">
+    <div class="bg-white shadow-2xl rounded-xl p-8 w-full max-w-3xl border border-blue-200">
+      
+      <!-- Heading and Profile -->
+      <div class="flex justify-between items-center mb-6">
+        <h1 class="text-4xl font-bold text-blue-800">🧊 ToDo Manager</h1>
+        {% if user.is_authenticated %}
+          <div class="relative inline-block text-left">
+            <button onclick="toggleDropdown()" class="flex items-center gap-2 bg-blue-100 hover:bg-blue-200 px-4 py-2 rounded-full transition text-blue-800">
+              <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" />
+              </svg>
+              {{ user.first_name }}
+            </button> 
+            <div id="dropdownMenu" class="hidden absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+              <a href="{% url 'logout' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-red-100">🚪 Logout</a>
+            </div>
+          </div>
+        {% else %}
+          <a href="{% url 'login' %}" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-white font-semibold transition">Login</a>
+        {% endif %}
+      </div>
+
+      <!-- Dropdown Script -->
+      <script>
+        function toggleDropdown() {
+          const menu = document.getElementById('dropdownMenu');
+          menu.classList.toggle('hidden');
+        }
+
+        document.addEventListener('click', function (e) {
+          const dropdown = document.getElementById('dropdownMenu');
+          const button = document.querySelector('[onclick="toggleDropdown()"]');
+          if (!dropdown.contains(e.target) && !button.contains(e.target)) {
+            dropdown.classList.add('hidden');
+          }
+        });
+      </script>
+
+      <!-- Add Task Section -->
+      <div class="bg-blue-50 p-6 rounded-lg shadow mb-10 border border-blue-100">
+        <form action="{% url 'create-todo' %}" method="POST" class="space-y-4">
+          {% csrf_token %}
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {{ todo_form.title }}
+            {{ todo_form.priority }}
+          </div>
+          {{ todo_form.description }}
+          <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+            {{ todo_form.due_date }}
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded text-white font-semibold transition whitespace-nowrap">➕ Add Task</button>
+          </div>
+        </form>
+      </div>
+
+        <!-- Filter Tabs -->
+        <div class="flex justify-center gap-4 mb-8">
+          <a href="?filter=" class="bg-blue-200 text-blue-900 px-4 py-1 rounded-full text-sm hover:bg-blue-500 hover:text-white transition">All</a>
+          <a href="?filter=active" class="bg-blue-200 text-blue-900 px-4 py-1 rounded-full text-sm hover:bg-blue-500 hover:text-white transition">Active</a>
+          <a href="?filter=completed" class="bg-blue-200 text-blue-900 px-4 py-1 rounded-full text-sm hover:bg-blue-500 hover:text-white transition">Completed</a>
+        </div>
+
+      <!-- Task Cards -->
+      <div class="space-y-4 max-h-96 overflow-y-auto pr-2">
+        {% for task in todo_list %}
+          <div class="bg-white border border-blue-100 text-gray-800 rounded-lg p-4 shadow-md flex flex-col md:flex-row justify-between items-start md:items-center gap-4 transition hover:shadow-lg">
+            <div class="flex-1">
+              <h3 class="text-xl font-bold">{{ task.title }}</h3>
+              <p class="text-sm text-gray-600 mt-1">{{ task.description }}</p>
+              <p class="mt-2 text-sm">
+                <strong>Due:</strong> {{ task.due_date }}
+              </p>
+              <p class="text-sm">
+                <strong>Priority:</strong> {{ task.priority|capfirst }}
+              </p>
+            </div>
+            <div class="flex gap-2">
+              {% if task.completed %}
+                <a href="{% url 'toggle-status' task.id %}" class="bg-green-600 hover:bg-green-700 px-3 py-1 rounded text-white text-sm">↩ Undo</a>
+              {% else %}
+                <a href="{% url 'toggle-status' task.id %}" class="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-white text-sm">✔ Done</a>
+              {% endif %}
+
+              <a href="{% url 'edit-todo' task.id %}" class="bg-yellow-500 hover:bg-yellow-600 px-3 py-1 rounded text-white text-sm">✏ Edit</a>
+              <a href="{% url 'delete-todo' task.id %}" onclick="return confirm('Are you sure you want to delete {{ task.title }}?');" class="bg-red-500 hover:bg-red-600 px-3 py-1 rounded text-white text-sm">🗑 Delete</a>
+            </div>
+          </div>
+        {% empty %}
+          <p class="text-center text-gray-500">No tasks found.</p>
+        {% endfor %}
+      </div>
+
+      <!-- Footer -->
+      <div class="mt-10 text-center text-sm text-blue-700">Crafted by Naeem Ahmed — Powered by Django + Tailwind CSS</div>
+    </div>
+  </div>
+{% endblock %}

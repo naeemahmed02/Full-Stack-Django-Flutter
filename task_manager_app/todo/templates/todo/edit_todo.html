@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 to-blue-200 py-12 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-2xl w-full space-y-8 bg-white rounded-xl shadow-lg p-10">
+    <div class="text-center">
+      <h2 class="text-3xl font-bold text-gray-800">✏️ Update Task</h2>
+      <p class="text-sm text-gray-500 mt-1">Edit and update your task details</p>
+    </div>
+
+    <form action="" method="POST" class="space-y-6">
+      {% csrf_token %}
+      <div class="space-y-4">
+        {{ todo_form.title }}
+        {{ todo_form.priority }}
+        {{ todo_form.description }}
+        {{ todo_form.due_date }}
+      </div>
+
+      <div class="flex justify-between items-center">
+        <a href="{% url 'todo-list' %}" class="text-blue-600 hover:underline text-sm">← Back to Tasks</a>
+        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded shadow transition">
+          🔄 Update Task
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
